@@ -1,0 +1,9 @@
+
+
+
+FROM bash:5
+M
+
+
+
+ENTRYPOINT

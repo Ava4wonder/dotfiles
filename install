@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+(shopt -p inherit_errexit &>/dev/null) && shopt -s inherit_errexit
+
+readonly SCRIPT_DIR="$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
+readonly SCRIPT_BASENAME="$(basename "$0")"
+
+# shellcheck source=deps/colors.bash
+source "$SCRIPT_DIR"/deps/colors.bash
+
+show_help() {
+  cat <<EOF
+${GREEN}Usage${RESET_ALL}: $SCRIPT_BASENAME <DOTFILE_DIR>
+
+${CYAN}Description${RESET_ALL}:
+Download dotfiles to <DOTFILE_DIR> and initialize all configs, plugins and bash.
+
+${BLUE}Argument${RESET_ALL}:
+DOTFILE_DIR        Main dotfile directory
+EOF
+}
+
+if [[ $# != 1 ]]; then
+  printf '%b\n' "$(show_help)"
+  exit 0
+fi
+
+main() {
+  readonly DOTFILE_DIR=$1
+
+  if [[ -e $DOTFILE_DIR ]]; then
+    echo "Cannot download dotfiles on existed file: $DOTFILE_DIR" >&2
+    exit 1
+  fi
+
+  # Clone this repo
+  git clone --depth 1 https://github.com/adoyle-h/dotfiles.git "$DOTFILE_DIR"
+
+  cd "$DOTFILE_DIR"
+  # Clone submodules and initialize them
+  git submodule update --init --recursive
+
+  # Install bash_it framework which is required
+  ./deps/bash-it/install.sh --no-modify-config
+
+  # Make sure XDG_ variables set
+  . bash/xdg.bash
+
+  # You may check the content of `install.conf.yaml` file,
+  # It creates soft-links based on install.conf.yaml.
+  ./install
+  # Checkout the output
+
+  # shellcheck source=bash/bashrc
+  . "$HOME/.bashrc"
+
+  # Reset bash-it
+  # shellcheck source=bootstraps/reset-bash
+  . "$DOTFILE_DIR/bootstraps/reset-bash"
+
+  echo "Last step: Please restart your shell. Enjoy yourself."
+}
+
+main "$@"

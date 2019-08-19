@@ -123,27 +123,10 @@ See [releases](https://github.com/adoyle-h/dotfiles/releases).
 # Set your Dotfiles directory path
 DOTFILE_DIR=~/dotfiles
 
-# Clone this repo
 git clone --depth 1 https://github.com/adoyle-h/dotfiles.git $DOTFILE_DIR
+
 cd $DOTFILE_DIR
-# Clone submodules and initialize them
-git submodule update --init --recursive
-
-# Install bash_it framework which is required
-./deps/bash-it/install.sh --no-modify-config
-
-# Make sure XDG_ variables set
-. bash/xdg.bash
-
-# You may check the content of `dotbot.conf.yaml` file,
-# It creates soft-links based on dotbot.conf.yaml.
-./dotbot
-# Checkout the output
-
-# Restart your shell
-
-# Reset bash-it
-. ${DOTFILE_DIR}/bootstraps/reset-bash
+./install $DOTFILE_DIR
 ```
 
 And then read the [Configuration - User Modifications](#user-modifications) section.
